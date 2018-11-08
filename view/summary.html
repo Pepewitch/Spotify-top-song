@@ -29,9 +29,6 @@
     />
   </head>
   <style>
-    body {
-      background: black;
-    }
     .underline {
       text-decoration: underline;
     }
@@ -41,23 +38,6 @@
     }
     * {
       font-family: gotham;
-      color: white;
-    }
-    .main {
-      background: linear-gradient(transparent, transparent, black),
-        url(/public/images/abstract-1780185_1920.png);
-      background-repeat: no-repeat;
-      height: 700px;
-      width: auto;
-      /* background-size: cover; */
-    }
-    .login-btn {
-      height: 64px;
-      border-radius: 32px;
-    }
-    .main-content {
-      background: linear-gradient(to right, transparent ,rgba(0,0,0,0.3),rgba(0,0,0,0.4), rgba(0,0,0,0.4) ,rgba(0,0,0,0.3), transparent);
-      height: 100%;
     }
   </style>
   <body>
@@ -72,15 +52,7 @@
     </div>
     <div class="container-fluid main">
       <div class="container main-content" style="padding: 60px 24px;">
-        <label style="font-size: 4em;">Top song features visualization</label><br>
-        <label style="font-size: 2em;">To gather data from Spotify API, we need to login first.</label><br>
-        <div style="padding: 24px 0;">
-          <form method="GET" action="/login/spotify">
-            <button type="submit" class="btn btn-success login-btn">
-              Login with Spotify
-            </button>
-          </form>
-        </div>
+        <label style="font-size: 4em;">Summary</label>
       </div>
     </div>
   </body>
