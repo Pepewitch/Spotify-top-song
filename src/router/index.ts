@@ -16,4 +16,14 @@ router.get('/', (req, res) => {
     .sendFile(join(__dirname, '..', '..', 'view', 'index.html'));
 });
 
+router.get('/summary', (req, res) => {
+  if (req.user) {
+    return res
+      .status(200)
+      .sendFile(join(__dirname, '..', '..', 'view', 'summary.html'));
+  } else {
+    return res.redirect('/');
+  }
+});
+
 export default router;

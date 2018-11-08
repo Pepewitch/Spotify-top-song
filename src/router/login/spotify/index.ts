@@ -6,19 +6,18 @@ const router = Router();
 
 router.get(
   '/',
-  passport.authenticate('spotify', { scope: spotify_scope, session: false }),
+  passport.authenticate('spotify', { scope: spotify_scope }),
 );
 
 router.get(
   '/callback',
   passport.authenticate('spotify', {
     failureRedirect: '/login',
-    session: false,
   }),
   (req, res) => {
     console.log({ user: req.user });
     res.cookie('accessToken', req.user.accessToken);
-    return res.redirect('/');
+    return res.redirect('/summary');
   },
 );
 

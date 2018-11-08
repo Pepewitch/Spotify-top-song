@@ -2,19 +2,17 @@ import passport = require('passport');
 import express = require('express');
 
 export interface Profile extends passport.Profile {
-  // id: string;
-  // displayName: string;
-  // gender?: string;
-  // ageRange?: {
-  //   min: number;
-  //   max?: number;
-  // };
-  // profileUrl?: string;
-  // username?: string;
-  // birthday: string;
-
-  // _raw: string;
-  // _json: any;
+  id: string;
+  provider: string;
+  username: string;
+  displayName: string;
+  photos: Array<any>;
+  follower: number;
+  product: string;
+  email: Array<string>;
+  profileUrl?: string;
+  _raw: string;
+  _json: any;
 }
 
 export interface AuthenticateOptions extends passport.AuthenticateOptions {
