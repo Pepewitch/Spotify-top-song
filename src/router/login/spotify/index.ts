@@ -16,8 +16,9 @@ router.get(
     session: false,
   }),
   (req, res) => {
-    console.log(req.user);
-    return res.redirect('/login/user');
+    console.log({ user: req.user });
+    res.cookie('accessToken', req.user.accessToken);
+    return res.redirect('/');
   },
 );
 

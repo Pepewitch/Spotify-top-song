@@ -12,7 +12,7 @@ const spotify = new Strategy(
   },
   async (accessToken, refreshToken, expires_in, profile, done) => {
     console.log({ accessToken, refreshToken, expires_in, profile });
-    done(null, profile.id);
+    done(null, { accessToken, profile });
   },
 );
 

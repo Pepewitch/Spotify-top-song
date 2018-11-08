@@ -1,13 +1,9 @@
 import { Router } from 'express';
 import passport from '../../passport';
 import spotify_router from './spotify';
-import facebook_router from './facebook';
-import google_router from './google';
 
 const router = Router();
 
-router.use('/facebook', facebook_router);
-router.use('/google', google_router);
 router.use('/spotify', spotify_router);
 
 router.get('/', (req, res) => {

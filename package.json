@@ -1,10 +1,10 @@
 {
-  "name": "express-mysql-boilerplate",
+  "name": "Spotify-top-song",
   "version": "1.0.0",
-  "description": "boilerplate for express app with mysql database",
+  "description": "Spotify top song visualization",
   "repository": {
     "type": "git",
-    "url": "git://github.com/Pepewitch/express-mysql-boilerplate.git"
+    "url": "git://github.com/Pepewitch/Spotify-top-song.git"
   },
   "scripts": {
     "start": "ts-node src/server.ts",
