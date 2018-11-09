@@ -5,11 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta http-equiv="X-UA-Compatible" content="ie=edge" />
     <title>Spotify Top Song</title>
-    <script
-      src="https://code.jquery.com/jquery-3.3.1.slim.min.js"
-      integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo"
-      crossorigin="anonymous"
-    ></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js"
       integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49"
@@ -51,9 +47,53 @@
       />
     </div>
     <div class="container-fluid main">
-      <div class="container main-content" style="padding: 60px 24px;">
+      <div class="container main-content" style="padding: 24px;">
         <label style="font-size: 4em;">Summary</label>
       </div>
     </div>
   </body>
+  <script>
+    function getFeatures(query, accessToken) {
+      return new Promise((res, rej) => {
+        $.ajax({
+          url: 'https://api.spotify.com/v1/audio-features?ids=' + query,
+          type: 'GET',
+          dataType: 'json',
+          headers: {
+            Authorization: 'Bearer ' + accessToken,
+          },
+          contentType: 'application/json; charset=utf-8',
+          success: function(result) {
+            res(result);
+          },
+          error: function(error) {
+            rej(error);
+          },
+        });
+      });
+    }
+    async function main() {
+      const topsong_csv = (await $.get('/public/regional-th-daily-latest.csv'))
+        .split('\n')
+        .map(e => e.split(','))
+        .slice(2);
+      topsong_csv.pop();
+      const accessToken = (await $.get('/accessToken')).accessToken;
+      const query1 = topsong_csv
+        .slice(0, 100)
+        .map(e => e[e.length - 1].split('/').pop())
+        .join(',');
+      const query2 = topsong_csv
+        .slice(100)
+        .map(e => e[e.length - 1].split('/').pop())
+        .join(',');
+      const features = (await Promise.all([getFeatures(query1 , accessToken) , getFeatures(query2 , accessToken)])).map(e => e.audio_features).flat();
+      const features_dict = {};
+      for(const i in features){
+        features_dict[features[i].id] = features[i];
+      }
+      console.log(features_dict);
+    }
+    main();
+  </script>
 </html>
