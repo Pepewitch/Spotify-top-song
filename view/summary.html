@@ -35,6 +35,9 @@
     * {
       font-family: gotham;
     }
+    rect.bar {
+      fill: steelblue;
+    }
   </style>
   <body>
     <div
@@ -48,11 +51,58 @@
     </div>
     <div class="container-fluid main">
       <div class="container main-content" style="padding: 24px;">
-        <label style="font-size: 4em;">Summary</label>
+        <label style="font-size: 4em;">Summary</label><br />
+        <label style="font-size: 2em;">200 Top songs on Thailand chart</label
+        ><br />
+        <div
+          class="btn-group"
+          role="group"
+          aria-label="Basic example"
+          style="padding: 0 0 24px 0;"
+        >
+          <button type="button" id="duration" class="btn btn-secondary">
+            Duration
+          </button>
+          <button type="button" id="tempo" class="btn btn-secondary">
+            Tempo
+          </button>
+          <button type="button" id="acoustic" class="btn btn-secondary">
+            Acousticness
+          </button>
+          <button type="button" id="danceability" class="btn btn-secondary">
+            Danceability
+          </button>
+          <button type="button" id="energy" class="btn btn-secondary">
+            Energy
+          </button>
+          <button type="button" id="instrumentalness" class="btn btn-secondary">
+            Instrumentalness
+          </button>
+          <button type="button" id="loudness" class="btn btn-secondary">
+            Loudness
+          </button>
+          <button type="button" id="liveness" class="btn btn-secondary">
+            Liveness
+          </button>
+        </div>
+        <br />
+        <label id="description"></label>
+        <div id="d3field"></div>
       </div>
     </div>
   </body>
   <script>
+    const feature_list = [
+      'acousticness',
+      'danceability',
+      'duration_ms',
+      'energy',
+      'instrumentalness',
+      'liveness',
+      'loudness',
+      'speechiness',
+      'tempo',
+    ];
     function getFeatures(query, accessToken) {
       return new Promise((res, rej) => {
         $.ajax({
@@ -76,23 +126,188 @@
       const topsong_csv = (await $.get('/public/regional-th-daily-latest.csv'))
         .split('\n')
         .map(e => e.split(','))
-        .slice(2);
+        .slice(1);
       topsong_csv.pop();
       const accessToken = (await $.get('/accessToken')).accessToken;
       const query1 = topsong_csv
+        .slice(1)
         .slice(0, 100)
         .map(e => e[e.length - 1].split('/').pop())
         .join(',');
       const query2 = topsong_csv
+        .slice(1)
         .slice(100)
         .map(e => e[e.length - 1].split('/').pop())
         .join(',');
-      const features = (await Promise.all([getFeatures(query1 , accessToken) , getFeatures(query2 , accessToken)])).map(e => e.audio_features).flat();
+      const features = (await Promise.all([
+        getFeatures(query1, accessToken),
+        getFeatures(query2, accessToken),
+      ]))
+        .map(e => e.audio_features)
+        .flat();
       const features_dict = {};
-      for(const i in features){
+      for (const i in features) {
         features_dict[features[i].id] = features[i];
       }
-      console.log(features_dict);
+      for (const i in feature_list) {
+        topsong_csv[0].push(feature_list[i]);
+      }
+      for (let i = 1; i < topsong_csv.length; i++) {
+        const row = topsong_csv[i];
+        const song_id = row[row.length - 1].split('/').pop();
+        const feature = features_dict[song_id];
+        const append_feature = feature_list.map(e => feature[e]);
+        for (const j in append_feature) {
+          row.push(append_feature[j]);
+        }
+      }
+      const data_csv = topsong_csv.map(e => e.join(',')).join('\n');
+      const description = $('#description');
+      $('#duration').click(() => {
+        description.html('The duration of the track');
+        hist(
+          data_csv,
+          'duration_ms',
+          'Song duration (Min)',
+          e => e / (60 * 1000),
+        );
+      });
+      $('#tempo').click(() => {
+        description.html(
+          'The overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.',
+        );
+        hist(data_csv, 'tempo', 'Tempo (Beats/Min)');
+      });
+      $('#acoustic').click(() => {
+        description.html(
+          'A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 1.0 represents high confidence the track is acoustic',
+        );
+        hist(data_csv, 'acousticness', 'Acousticness');
+      });
+      $('#danceability').click(() => {
+        description.html(
+          'Danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.',
+        );
+        hist(data_csv, 'danceability', 'Danceability');
+      });
+      $('#energy').click(() => {
+        description.html(
+          'Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. Perceptual features contributing to this attribute include dynamic range, perceived loudness, timbre, onset rate, and general entropy. ',
+        );
+        hist(data_csv, 'energy', 'Energy');
+      });
+      $('#instrumentalness').click(() => {
+        description.html(
+          'Predicts whether a track contains no vocals. “Ooh” and “aah” sounds are treated as instrumental in this context. Rap or spoken word tracks are clearly “vocal”. The closer the instrumentalness value is to 1.0, the greater likelihood the track contains no vocal content. Values above 0.5 are intended to represent instrumental tracks, but confidence is higher as the value approaches 1.0.',
+        );
+        hist(data_csv, 'instrumentalness', 'Instrumentalness');
+      });
+      $('#loudness').click(() => {
+        description.html(
+          'The overall loudness of a track in decibels (dB). Loudness values are averaged across the entire track and are useful for comparing relative loudness of tracks. Loudness is the quality of a sound that is the primary psychological correlate of physical strength (amplitude). Values typical range between -60 and 0 db.',
+        );
+        hist(data_csv, 'loudness', 'Loudness');
+      });
+      $('#liveness').click(() => {
+        description.html(
+          'Detects the presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live. A value above 0.8 provides strong likelihood that the track is live.',
+        );
+        hist(data_csv, 'liveness', 'Liveness');
+      });
+    }
+    function hist(string_csv, column, labelX, transform = e => e) {
+      $('#d3field').empty();
+      // get the data
+      const data = d3.csvParse(string_csv, d => {
+        feature_list.map(e => (d[e] = +d[e]));
+        d[column] = transform(d[column]);
+        return { ...d, Position: +d.Position };
+      });
+      console.log(data);
+      // set the dimensions and margins of the graph
+      var margin = { top: 10, right: 30, bottom: 60, left: 60 },
+        width = 960 - margin.left - margin.right,
+        height = 500 - margin.top - margin.bottom;
+      const min_domain = data.reduce((p, c) => (c[column] < p[column] ? c : p))[
+        column
+      ];
+      const max_domain = data.reduce((p, c) => (c[column] > p[column] ? c : p))[
+        column
+      ];
+      var x = d3
+        .scaleLinear()
+        .domain([0.8 * min_domain, 1.2 * max_domain])
+        .range([0, 960 - margin.left - margin.right]);
+      var y = d3.scaleLinear().range([height, 0]);
+      // set the parameters for the histogram
+      var histogram = d3
+        .histogram()
+        .value(function(d) {
+          return d[column];
+        })
+        .domain(x.domain())
+        .thresholds(x.ticks(20));
+      // append the svg object to the body of the page
+      // append a 'group' element to 'svg'
+      // moves the 'group' element to the top left margin
+      var svg = d3
+        .select('#d3field')
+        .append('svg')
+        .attr('width', width + margin.left + margin.right)
+        .attr('height', height + margin.top + margin.bottom)
+        .append('g')
+        .attr('transform', 'translate(' + margin.left + ',' + margin.top + ')');
+      // format the data
+      // group the data for the bars
+      var bins = histogram(data);
+      console.log(bins);
+      // Scale the range of the data in the y domain
+      y.domain([
+        0,
+        d3.max(bins, function(d) {
+          return d.length;
+        }),
+      ]);
+      // append the bar rectangles to the svg element
+      svg
+        .selectAll('rect')
+        .data(bins)
+        .enter()
+        .append('rect')
+        .attr('class', 'bar')
+        .attr('x', 1)
+        .attr('transform', function(d) {
+          return 'translate(' + x(d.x0) + ',' + y(d.length) + ')';
+        })
+        .attr('width', function(d) {
+          return x(d.x1) - x(d.x0) - 1;
+        })
+        .attr('height', function(d) {
+          return height - y(d.length);
+        });
+      // add the x Axis
+      svg
+        .append('g')
+        .attr('transform', 'translate(0,' + height + ')')
+        .call(d3.axisBottom(x));
+      // add the y Axis
+      svg.append('g').call(d3.axisLeft(y));
+      svg
+        .append('text')
+        .attr('transform', 'rotate(-90)')
+        .attr('y', 0 - margin.left)
+        .attr('x', 0 - height / 2)
+        .attr('dy', '1em')
+        .style('text-anchor', 'middle')
+        .text('Number of songs');
+      svg
+        .append('text')
+        .attr(
+          'transform',
+          'translate(' + width / 2 + ' ,' + (height + margin.top + 40) + ')',
+        )
+        .style('text-anchor', 'middle')
+        .text(labelX);
     }
     main();
   </script>
