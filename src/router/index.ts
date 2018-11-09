@@ -26,4 +26,13 @@ router.get('/summary', (req, res) => {
   }
 });
 
+router.get('/accessToken', (req, res) => {
+  if (!req.user) {
+    return res.sendStatus(401);
+  }
+  if (req.user.accessToken) {
+    return res.status(200).send({ accessToken: req.user.accessToken });
+  }
+});
+
 export default router;
