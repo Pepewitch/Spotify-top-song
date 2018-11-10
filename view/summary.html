@@ -23,10 +23,14 @@
       integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
       crossorigin="anonymous"
     />
+    <script src="https://sdk.scdn.co/spotify-player.js"></script>
   </head>
   <style>
     .underline {
       text-decoration: underline;
+    }
+    .pointer {
+      cursor: pointer;
     }
     @font-face {
       font-family: gotham;
@@ -37,6 +41,13 @@
     }
     rect.bar {
       fill: steelblue;
+      cursor: pointer;
+    }
+    .clicked {
+      fill: red !important;
+    }
+    rect.bar:hover {
+      fill: rgba(60, 100, 180);
     }
   </style>
   <body>
@@ -86,8 +97,10 @@
           </button>
         </div>
         <br />
+        <h2 id="header"></h2>
         <label id="description"></label>
         <div id="d3field"></div>
+        <div id="d3description"></div>
       </div>
     </div>
   </body>
@@ -122,6 +135,52 @@
         });
       });
     }
+    function getSpotifyPlayer(accessToken) {
+      return new Promise((res, rej) => {
+        window.onSpotifyWebPlaybackSDKReady = () => {
+          const token = accessToken;
+          const player = new Spotify.Player({
+            name: 'Web Playback SDK Quick Start Player',
+            getOAuthToken: cb => {
+              cb(token);
+            },
+          });
+
+          // Error handling
+          player.addListener('initialization_error', ({ message }) => {
+            console.error(message);
+          });
+          player.addListener('authentication_error', ({ message }) => {
+            console.error(message);
+          });
+          player.addListener('account_error', ({ message }) => {
+            console.error(message);
+          });
+          player.addListener('playback_error', ({ message }) => {
+            console.error(message);
+          });
+
+          // Playback status updates
+          player.addListener('player_state_changed', state => {
+            console.log(state);
+          });
+
+          // Ready
+          player.addListener('ready', ({ device_id }) => {
+            console.log('Ready with Device ID', device_id);
+          });
+
+          // Not Ready
+          player.addListener('not_ready', ({ device_id }) => {
+            console.log('Device ID has gone offline', device_id);
+          });
+
+          // Connect to the player!
+          player.connect();
+          res(player);
+        };
+      });
+    }
     async function main() {
       const topsong_csv = (await $.get('/public/regional-th-daily-latest.csv'))
         .split('\n')
@@ -129,6 +188,7 @@
         .slice(1);
       topsong_csv.pop();
       const accessToken = (await $.get('/accessToken')).accessToken;
+      const player = await getSpotifyPlayer(accessToken);
       const query1 = topsong_csv
         .slice(1)
         .slice(0, 100)
@@ -163,59 +223,78 @@
       }
       const data_csv = topsong_csv.map(e => e.join(',')).join('\n');
       const description = $('#description');
+      const header = $('#header');
+      const d3description = $('#d3description');
       $('#duration').click(() => {
+        d3description.empty();
+        header.html('Duration');
         description.html('The duration of the track');
         hist(
           data_csv,
+          player,
           'duration_ms',
           'Song duration (Min)',
           e => e / (60 * 1000),
         );
       });
       $('#tempo').click(() => {
+        d3description.empty();
+        header.html('Tempo');
         description.html(
           'The overall estimated tempo of a track in beats per minute (BPM). In musical terminology, tempo is the speed or pace of a given piece and derives directly from the average beat duration.',
         );
-        hist(data_csv, 'tempo', 'Tempo (Beats/Min)');
+        hist(data_csv, player, 'tempo', 'Tempo (Beats/Min)');
       });
       $('#acoustic').click(() => {
+        d3description.empty();
+        header.html('Acousticness');
         description.html(
           'A confidence measure from 0.0 to 1.0 of whether the track is acoustic. 1.0 represents high confidence the track is acoustic',
         );
-        hist(data_csv, 'acousticness', 'Acousticness');
+        hist(data_csv, player, 'acousticness', 'Acousticness');
       });
       $('#danceability').click(() => {
+        d3description.empty();
+        header.html('Danceability');
         description.html(
           'Danceability describes how suitable a track is for dancing based on a combination of musical elements including tempo, rhythm stability, beat strength, and overall regularity. A value of 0.0 is least danceable and 1.0 is most danceable.',
         );
-        hist(data_csv, 'danceability', 'Danceability');
+        hist(data_csv, player, 'danceability', 'Danceability');
       });
       $('#energy').click(() => {
+        d3description.empty();
+        header.html('Energy');
         description.html(
           'Energy is a measure from 0.0 to 1.0 and represents a perceptual measure of intensity and activity. Typically, energetic tracks feel fast, loud, and noisy. For example, death metal has high energy, while a Bach prelude scores low on the scale. Perceptual features contributing to this attribute include dynamic range, perceived loudness, timbre, onset rate, and general entropy. ',
         );
-        hist(data_csv, 'energy', 'Energy');
+        hist(data_csv, player, 'energy', 'Energy');
       });
       $('#instrumentalness').click(() => {
+        d3description.empty();
+        header.html('Instrumentalness');
         description.html(
           'Predicts whether a track contains no vocals. “Ooh” and “aah” sounds are treated as instrumental in this context. Rap or spoken word tracks are clearly “vocal”. The closer the instrumentalness value is to 1.0, the greater likelihood the track contains no vocal content. Values above 0.5 are intended to represent instrumental tracks, but confidence is higher as the value approaches 1.0.',
         );
-        hist(data_csv, 'instrumentalness', 'Instrumentalness');
+        hist(data_csv, player, 'instrumentalness', 'Instrumentalness');
       });
       $('#loudness').click(() => {
+        d3description.empty();
+        header.html('Loudness');
         description.html(
           'The overall loudness of a track in decibels (dB). Loudness values are averaged across the entire track and are useful for comparing relative loudness of tracks. Loudness is the quality of a sound that is the primary psychological correlate of physical strength (amplitude). Values typical range between -60 and 0 db.',
         );
-        hist(data_csv, 'loudness', 'Loudness');
+        hist(data_csv, player, 'loudness', 'Loudness');
       });
       $('#liveness').click(() => {
+        d3description.empty();
+        header.html('Liveness');
         description.html(
           'Detects the presence of an audience in the recording. Higher liveness values represent an increased probability that the track was performed live. A value above 0.8 provides strong likelihood that the track is live.',
         );
-        hist(data_csv, 'liveness', 'Liveness');
+        hist(data_csv, player, 'liveness', 'Liveness');
       });
     }
-    function hist(string_csv, column, labelX, transform = e => e) {
+    function hist(string_csv, player, column, labelX, transform = e => e) {
       $('#d3field').empty();
       // get the data
       const data = d3.csvParse(string_csv, d => {
@@ -226,8 +305,8 @@
       console.log(data);
       // set the dimensions and margins of the graph
       var margin = { top: 10, right: 30, bottom: 60, left: 60 },
-        width = 960 - margin.left - margin.right,
-        height = 500 - margin.top - margin.bottom;
+        width = 800 - margin.left - margin.right,
+        height = 400 - margin.top - margin.bottom;
       const min_domain = data.reduce((p, c) => (c[column] < p[column] ? c : p))[
         column
       ];
@@ -284,6 +363,78 @@
         })
         .attr('height', function(d) {
           return height - y(d.length);
+        })
+        .on('click', function(d, i) {
+          console.log(d);
+          svg.selectAll('rect').classed('clicked', false);
+          $(this).addClass('clicked');
+          const description = $('#d3description');
+          description.empty();
+          description.append(
+            `<label>From x = ${d.x0} to ${d.x1} ( Total ${
+              d.length
+            } songs )</label>`,
+          );
+          const table = $('<table>').addClass('table-hover').addClass('table');
+          const thead = $('<thead>');
+          const header = $('<tr>');
+          header.append('<th scope="col">Rank</th>');
+          header.append('<th scope="col">Name</th>');
+          header.append('<th scope="col">Artist</th>');
+          header.append(`<th scope="col">${labelX}</th>`);
+          thead.append(header);
+          table.append(thead);
+          const tbody = $('<tbody>');
+          d.map(e => {
+            const each_row = $('<tr>');
+            each_row.addClass('pointer');
+            each_row.click(() => {
+              play({
+                playerInstance: player,
+                spotify_uri: `spotify:track:${e['URL'].split('/').pop()}`,
+              });
+            });
+            [
+              e['Position'],
+              e['Track Name'],
+              e['Artist'],
+              e[column].toFixed(2),
+            ].forEach(each => {
+              const cell = $('<td>');
+              cell.html(each);
+              each_row.append(cell);
+            });
+            tbody.append(each_row);
+          });
+          table.append(tbody);
+          description.append(table);
+          const play = ({
+            spotify_uri,
+            playerInstance: {
+              _options: { getOAuthToken, id },
+            },
+          }) => {
+            getOAuthToken(access_token => {
+              fetch(
+                `https://api.spotify.com/v1/me/player/play?device_id=${id}`,
+                {
+                  method: 'PUT',
+                  body: JSON.stringify({ uris: [spotify_uri] }),
+                  headers: {
+                    'Content-Type': 'application/json',
+                    Authorization: `Bearer ${access_token}`,
+                  },
+                },
+              );
+            });
+          };
+          if (d.length > 0) {
+            play({
+              playerInstance: player,
+              spotify_uri: `spotify:track:${d[0]['URL'].split('/').pop()}`,
+            });
+          }
+          // description.append()
         });
       // add the x Axis
       svg
