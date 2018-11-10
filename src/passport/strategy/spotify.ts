@@ -1,6 +1,11 @@
 import { Strategy } from 'passport-spotify';
 
-export const spotify_scope = ['user-read-email', 'user-read-private'];
+export const spotify_scope = [
+  'streaming',
+  'user-read-birthdate',
+  'user-read-email',
+  'user-read-private',
+];
 
 const spotify = new Strategy(
   {
