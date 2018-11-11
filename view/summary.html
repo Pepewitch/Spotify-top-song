@@ -40,14 +40,14 @@
       font-family: gotham;
     }
     rect.bar {
-      fill: steelblue;
+      fill: #1db954;
       cursor: pointer;
     }
     .clicked {
       fill: red !important;
     }
     rect.bar:hover {
-      fill: rgba(60, 100, 180);
+      fill: #0da945;
     }
   </style>
   <body>
@@ -63,8 +63,8 @@
     <div class="container-fluid main">
       <div class="container main-content" style="padding: 24px;">
         <label style="font-size: 4em;">Summary</label><br />
-        <label style="font-size: 2em;">200 Top songs on Thailand chart</label
-        ><br />
+        <label style="font-size: 2em;">200 Top songs on <span id="set">Thailand</span> chart</label>
+        <br />
         <div
           class="btn-group"
           role="group"
@@ -181,14 +181,19 @@
         };
       });
     }
-    async function main() {
-      const topsong_csv = (await $.get('/public/regional-th-daily-latest.csv'))
+    async function main(file='regional-th-daily-latest.csv') {
+      const topsong_csv = (await $.get(`/public/${file}`))
         .split('\n')
         .map(e => e.split(','))
         .slice(1);
       topsong_csv.pop();
       const accessToken = (await $.get('/accessToken')).accessToken;
-      const player = await getSpotifyPlayer(accessToken);
+      let player;
+      try{
+        player = await getSpotifyPlayer(accessToken);
+      }catch(e){
+        console.log(e);
+      }
       const query1 = topsong_csv
         .slice(1)
         .slice(0, 100)
