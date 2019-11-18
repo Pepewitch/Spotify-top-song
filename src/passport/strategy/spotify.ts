@@ -11,9 +11,7 @@ const spotify = new Strategy(
   {
     clientID: process.env.SPOTIFY_CLIENT_ID,
     clientSecret: process.env.SPOTIFY_CLIENT_SECRET,
-    callbackURL: `${process.env.BASE_URL}:${
-      process.env.PORT
-    }/login/spotify/callback`,
+    callbackURL: `${process.env.CALLBACK_URL}`,
   },
   async (accessToken, refreshToken, expires_in, profile, done) => {
     console.log({ accessToken, refreshToken, expires_in, profile });
