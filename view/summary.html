@@ -48,16 +48,42 @@
     rect.bar:hover {
       fill: #0da945;
     }
+    .navbar {
+      padding: 16px 32px;
+      background: black;
+      color: white;
+    }
+    .logo {
+      max-height: 48px;
+      width: auto;
+    }
+    .main {
+      width: 100%;
+      overflow: auto;
+    }
+    .btn-group {
+      overflow: auto;
+      width: 100%;
+    }
+    #d3field {
+      width: 100%;
+      overflow: auto;
+    }
+    #d3description {
+      overflow: auto;
+    }
+    @media screen and (max-width: 600px) {
+      .navbar {
+        padding: 8px 16px;
+      }
+      .logo {
+        max-height: 32px;
+      }
+    }
   </style>
   <body>
-    <div
-      class="container-fluid"
-      style="padding: 16px 32px; background: black; color: white;"
-    >
-      <img
-        src="/public/images/Spotify_Logo_RGB_White.png"
-        style="max-height: 48px; width: auto;"
-      />
+    <div class="container-fluid navbar">
+      <img src="/public/images/Spotify_Logo_RGB_White.png" class="logo" />
     </div>
     <div class="container-fluid main">
       <div class="container main-content" style="padding: 24px;">

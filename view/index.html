@@ -56,24 +56,49 @@
       border-radius: 32px;
     }
     .main-content {
-      background: linear-gradient(to right, transparent ,rgba(0,0,0,0.3),rgba(0,0,0,0.4), rgba(0,0,0,0.4) ,rgba(0,0,0,0.3), transparent);
+      background: linear-gradient(
+        to right,
+        transparent,
+        rgba(0, 0, 0, 0.3),
+        rgba(0, 0, 0, 0.4),
+        rgba(0, 0, 0, 0.4),
+        rgba(0, 0, 0, 0.3),
+        transparent
+      );
       height: 100%;
+    }
+    .navbar {
+      padding: 16px 32px;
+      background: black;
+      color: white;
+    }
+    .logo {
+      max-height: 48px;
+      width: auto;
+    }
+    @media screen and (max-width: 600px) {
+      body {
+        font-size: 0.6rem;
+      }
+      .navbar {
+        padding: 8px 16px;
+      }
+      .logo {
+        max-height: 32px;
+      }
     }
   </style>
   <body>
-    <div
-      class="container-fluid"
-      style="padding: 16px 32px; background: black; color: white;"
-    >
-      <img
-        src="/public/images/Spotify_Logo_RGB_White.png"
-        style="max-height: 48px; width: auto;"
-      />
+    <div class="container-fluid navbar">
+      <img class="logo" src="/public/images/Spotify_Logo_RGB_White.png" />
     </div>
     <div class="container-fluid main">
       <div class="container main-content" style="padding: 60px 24px;">
-        <label style="font-size: 4em;">Top song features visualization</label><br>
-        <label style="font-size: 2em;">To gather data from Spotify API, we need to login first.</label><br>
+        <label style="font-size: 4em;">Top song features visualization</label
+        ><br />
+        <label style="font-size: 2em;"
+          >To gather data from Spotify API, we need to login first.</label
+        ><br />
         <div style="padding: 24px 0;">
           <form method="GET" action="/login/spotify">
             <button type="submit" class="btn btn-success login-btn">
