@@ -23,7 +23,6 @@
       integrity="sha384-MCw98/SFnGE8fJT3GXwEOngsV7Zt27NXFoaoApmYm81iuXoPkFOJwJ8ERdknLPMO"
       crossorigin="anonymous"
     />
-    <script src="https://sdk.scdn.co/spotify-player.js"></script>
   </head>
   <style>
     .underline {
@@ -63,7 +62,9 @@
     <div class="container-fluid main">
       <div class="container main-content" style="padding: 24px;">
         <label style="font-size: 4em;">Summary</label><br />
-        <label style="font-size: 2em;">200 Top songs on <span id="set">Thailand</span> chart</label>
+        <label style="font-size: 2em;"
+          >200 Top songs on <span id="set">Thailand</span> chart</label
+        >
         <br />
         <div
           class="btn-group"
@@ -137,51 +138,49 @@
     }
     function getSpotifyPlayer(accessToken) {
       return new Promise((res, rej) => {
-        window.onSpotifyWebPlaybackSDKReady = () => {
-          const token = accessToken;
-          const player = new Spotify.Player({
-            name: 'Web Playback SDK Quick Start Player',
-            getOAuthToken: cb => {
-              cb(token);
-            },
-          });
+        const token = accessToken;
+        const player = new Spotify.Player({
+          name: 'Web Playback SDK Quick Start Player',
+          getOAuthToken: cb => {
+            cb(token);
+          },
+        });
 
-          // Error handling
-          player.addListener('initialization_error', ({ message }) => {
-            console.error(message);
-          });
-          player.addListener('authentication_error', ({ message }) => {
-            console.error(message);
-          });
-          player.addListener('account_error', ({ message }) => {
-            console.error(message);
-          });
-          player.addListener('playback_error', ({ message }) => {
-            console.error(message);
-          });
+        // Error handling
+        player.addListener('initialization_error', ({ message }) => {
+          console.error(message);
+        });
+        player.addListener('authentication_error', ({ message }) => {
+          console.error(message);
+        });
+        player.addListener('account_error', ({ message }) => {
+          console.error(message);
+        });
+        player.addListener('playback_error', ({ message }) => {
+          console.error(message);
+        });
 
-          // Playback status updates
-          player.addListener('player_state_changed', state => {
-            console.log(state);
-          });
+        // Playback status updates
+        player.addListener('player_state_changed', state => {
+          console.log(state);
+        });
 
-          // Ready
-          player.addListener('ready', ({ device_id }) => {
-            console.log('Ready with Device ID', device_id);
-          });
+        // Ready
+        player.addListener('ready', ({ device_id }) => {
+          console.log('Ready with Device ID', device_id);
+        });
 
-          // Not Ready
-          player.addListener('not_ready', ({ device_id }) => {
-            console.log('Device ID has gone offline', device_id);
-          });
+        // Not Ready
+        player.addListener('not_ready', ({ device_id }) => {
+          console.log('Device ID has gone offline', device_id);
+        });
 
-          // Connect to the player!
-          player.connect();
-          res(player);
-        };
+        // Connect to the player!
+        player.connect();
+        res(player);
       });
     }
-    async function main(file='regional-th-daily-latest.csv') {
+    async function main(file = 'regional-th-daily-latest.csv') {
       const topsong_csv = (await $.get(`/public/${file}`))
         .split('\n')
         .map(e => e.split(','))
@@ -189,9 +188,9 @@
       topsong_csv.pop();
       const accessToken = (await $.get('/accessToken')).accessToken;
       let player;
-      try{
+      try {
         player = await getSpotifyPlayer(accessToken);
-      }catch(e){
+      } catch (e) {
         console.log(e);
       }
       const query1 = topsong_csv
@@ -204,10 +203,12 @@
         .slice(100)
         .map(e => e[e.length - 1].split('/').pop())
         .join(',');
-      const features = (await Promise.all([
-        getFeatures(query1, accessToken),
-        getFeatures(query2, accessToken),
-      ]))
+      const features = (
+        await Promise.all([
+          getFeatures(query1, accessToken),
+          getFeatures(query2, accessToken),
+        ])
+      )
         .map(e => e.audio_features)
         .flat();
       const features_dict = {};
@@ -376,11 +377,11 @@
           const description = $('#d3description');
           description.empty();
           description.append(
-            `<label>From x = ${d.x0} to ${d.x1} ( Total ${
-              d.length
-            } songs )</label>`,
+            `<label>From x = ${d.x0} to ${d.x1} ( Total ${d.length} songs )</label>`,
           );
-          const table = $('<table>').addClass('table-hover').addClass('table');
+          const table = $('<table>')
+            .addClass('table-hover')
+            .addClass('table');
           const thead = $('<thead>');
           const header = $('<tr>');
           header.append('<th scope="col">Rank</th>');
@@ -465,6 +466,9 @@
         .style('text-anchor', 'middle')
         .text(labelX);
     }
-    main();
+    window.onSpotifyWebPlaybackSDKReady = () => {
+      main();
+    };
   </script>
+  <script src="https://sdk.scdn.co/spotify-player.js"></script>
 </html>
