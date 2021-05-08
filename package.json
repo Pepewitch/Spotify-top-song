@@ -43,7 +43,7 @@
     "passport-spotify": "^1.0.1",
     "reflect-metadata": "^0.1.10",
     "request": "^2.88.0",
-    "typeorm": "^0.2.8"
+    "typeorm": "^0.2.25"
   },
   "devDependencies": {
     "@types/cors": "^2.8.4",
